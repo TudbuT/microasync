@@ -83,8 +83,12 @@ fn main() {
     println!("{}", sync(do_sth_async(1000)));
 }
 
+async fn subtract_async(a: i32, b: i32) -> i32 {
+    a - b
+}
+
 async fn add_async(a: i32, b: i32) -> i32 {
-    a + b
+    subtract_async(a, -b).await
 }
 
 async fn do_sth_async(i: i32) -> i32 {
