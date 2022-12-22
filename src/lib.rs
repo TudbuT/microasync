@@ -30,7 +30,7 @@ pub fn sync<T>(future: impl Future<Output = T> + 'static) -> T {
     // Now actually run the future.
     loop {
         // SAFETY: Access to the future field is single-threaded (unlike the sync_thread field),
-        // therefore we can access it mutable.
+        // therefore we can access it mutably.
         let future = unsafe { task.future.get().as_mut().unwrap() };
         let waker = waker_ref(&task);
         let context = &mut Context::from_waker(&waker);
