@@ -1,10 +1,9 @@
 [package]
 name = "microasync"
-version = "0.2.3"
+version = "0.2.4"
 edition = "2021"
 repository = "https://github.com/tudbut/microasync"
 license = "MIT"
 description = "Very small async runner"
 
 [dependencies]
-futures-task = "0.3"
