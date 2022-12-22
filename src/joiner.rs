@@ -15,6 +15,7 @@ pub struct JoinedFuture<T> {
 }
 
 impl<T> JoinedFuture<T> {
+    #[inline]
     fn new(futures: Vec<BoxFuture<T>>) -> Self {
         Self {
             futures: futures.into_iter().map(|x| (None, x)).collect(),
@@ -49,10 +50,12 @@ impl<T> Future for JoinedFuture<T> {
     }
 }
 
+#[inline]
 pub fn prep<T>(future: impl Future<Output = T> + 'static) -> BoxFuture<T> {
     Box::pin(future)
 }
 
+#[inline]
 pub fn join<T>(futures: Vec<BoxFuture<T>>) -> JoinedFuture<T> {
     JoinedFuture::new(futures)
 }

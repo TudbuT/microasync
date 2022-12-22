@@ -17,6 +17,7 @@ fn empty_clone(_: *const ()) -> RawWaker {
     empty_raw_waker()
 }
 
+#[inline]
 fn empty_raw_waker() -> RawWaker {
     RawWaker::new(
         null(),
@@ -24,6 +25,7 @@ fn empty_raw_waker() -> RawWaker {
     )
 }
 
+#[inline]
 fn empty_waker() -> Waker {
     // SAFETY: Can't fail because no dynamic data is used and this function was tested.
     unsafe { Waker::from_raw(empty_raw_waker()) }
