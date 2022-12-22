@@ -1,4 +1,4 @@
-use std::{cell::UnsafeCell, future::Future, pin::Pin, sync::Arc, task::Context, thread};
+use std::{cell::UnsafeCell, future::Future, pin::Pin, sync::Arc, task::Context, thread, time::Duration};
 
 use futures_task::{waker_ref, ArcWake, Poll};
 
@@ -38,6 +38,6 @@ pub fn sync<T>(future: impl Future<Output = T> + 'static) -> T {
         if let Poll::Ready(content) = future.as_mut().poll(context) {
             return content;
         }
-        thread::park();
+        thread::park_timeout(Duration::from_millis(1));
     }
 }
