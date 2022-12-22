@@ -17,7 +17,7 @@ fn empty_waker() -> Waker {
 
 pub fn sync<T>(mut future: impl Future<Output = T> + 'static) -> T {
     // Initialize things
-    // SAFETY: Safe because of use-case
+    // SAFETY: Safe because this is single threaded and `future` won't be dropped.
     let mut future = unsafe {
         Pin::new_unchecked(&mut future)
     };
