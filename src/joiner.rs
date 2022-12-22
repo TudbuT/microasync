@@ -38,7 +38,7 @@ impl<T> Future for JoinedFuture<T> {
                 continue;
             }
             done = false;
-            if let Poll::Ready(content) = future.1.as_mut().as_mut().poll(cx) {
+            if let Poll::Ready(content) = future.1.as_mut().poll(cx) {
                 future.0 = Some(content);
             }
         }
