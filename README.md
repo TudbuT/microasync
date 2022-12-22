@@ -33,3 +33,8 @@ async fn do_sth_async(i: i32) -> i32 {
     add_async(i, i * 4).await
 }
 ```
+
+## No STD? No problem.
+
+This crate supports a `no_std` environment. To do this, enable the `no_std` feature of
+this crate.

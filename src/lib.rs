@@ -1,4 +1,5 @@
-use std::{future::Future, task::{Context, Waker, RawWaker, RawWakerVTable, Poll}, thread, ptr::null};
+#![no_std]
+use core::{future::Future, task::{Context, Waker, RawWaker, RawWakerVTable, Poll}, ptr::null};
 use core::pin::Pin;
 
 fn empty(_: *const ()) {}
@@ -32,6 +33,11 @@ pub fn sync<T>(mut future: impl Future<Output = T> + 'static) -> T {
         if let Poll::Ready(content) = future.as_mut().poll(context) {
             return content;
         }
-        thread::yield_now();
+        #[cfg(not(feature = "no_std"))] {
+            // this won't be added to the binary if the no_std feature is enabled.
+            extern crate std;
+            // thread::yield_now is bug-ridden, this'll have to do.
+            std::thread::sleep(std::time::Duration::from_millis(1));
+        }
     }
 }
