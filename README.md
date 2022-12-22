@@ -41,9 +41,9 @@ this crate.
 
 ## Joining
 
-Multiple futures can be joined using the join!() macro, which will effectively parallelize two
-futures into one, which can then, once again, be run by sync(). This allows most things
-to be implementable using MicroAsync.
+Multiple futures can be joined using the join!() macro, which will effectively parallelize
+many futures into one, which can then, once again, be run by sync(). This allows most
+things to be implementable using MicroAsync.
 
 This feature can be deactivated by using the `no_joiner` feature flag.
 
