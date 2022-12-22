@@ -7,7 +7,7 @@ fn main() {
     // but oh no! this doesn't work, because do_sth_async is async and main is sync!
 
     // Here's where microasync::sync comes into play:
-    println!("{}", sync(do_sth_async(1000)).unwrap());
+    println!("{}", sync(do_sth_async(1000)));
     // It synchronizes a single async function, returning its result as if it was a normal
     // function. For this, a *tiny*, single-threaded async "runtime" is created, that runs this one
     // task, and then stops.

@@ -1,18 +1,18 @@
-use std::{sync::{Arc, mpsc::{SyncSender, sync_channel}, Mutex}, future::Future, task::Context, pin::Pin};
+use std::{cell::UnsafeCell, future::Future, pin::Pin, sync::Arc, task::Context, thread};
 
-use futures_task::{ArcWake, waker_ref, Poll};
+use futures_task::{waker_ref, ArcWake, Poll};
 
 type BoxFuture<T> = Pin<Box<dyn Future<Output = T> + 'static>>;
 
 struct MicroTask<T> {
-    future: Mutex<Option<BoxFuture<T>>>,
-    queue: SyncSender<Arc<Self>>,
+    future: UnsafeCell<BoxFuture<T>>,
+    sync_thread: thread::Thread,
 }
 
 impl<T> ArcWake for MicroTask<T> {
     fn wake_by_ref(arc_self: &Arc<Self>) {
         // SAFETY: Can't fail because the runner only stops once the future is done.
-        arc_self.queue.send(arc_self.clone()).unwrap(); 
+        arc_self.sync_thread.unpark();
     }
 }
 
@@ -20,24 +20,24 @@ impl<T> ArcWake for MicroTask<T> {
 unsafe impl<T> Send for MicroTask<T> {}
 unsafe impl<T> Sync for MicroTask<T> {}
 
-pub fn sync<T>(future: impl Future<Output = T> + 'static) -> Option<T> {
+pub fn sync<T>(future: impl Future<Output = T> + 'static) -> T {
     // Initialize things
-    let (queue_sender, queue) = sync_channel(1); // Single-task runner, so this can be 1
-    let future = Arc::new(MicroTask { future: Mutex::new(Some(Box::pin(future))), queue: queue_sender.clone() } );
-    queue_sender.send(future).unwrap(); // SAFETY: Can't fail due to queue being in-scope
+    let task = Arc::new(MicroTask {
+        future: UnsafeCell::new(Box::pin(future)),
+        sync_thread: thread::current(),
+    });
 
     // Now actually run the future.
-    while let Ok(task) = queue.recv() {
-        // SAFETY: This will never panic because this runner is single-threaded.
-        if let Some(future) = task.future.lock().unwrap().as_mut() {
-            let waker = waker_ref(&task);
-            let context = &mut Context::from_waker(&waker);
-            // If the future is done, stop and return.
-            if let Poll::Ready(content) = future.as_mut().poll(context) {
-                return Some(content);
-            }
+    loop {
+        // SAFETY: Access to the future field is single-threaded (unlike the sync_thread field),
+        // therefore we can access it mutable.
+        let future = unsafe { task.future.get().as_mut().unwrap() };
+        let waker = waker_ref(&task);
+        let context = &mut Context::from_waker(&waker);
+        // If the future is done, stop and return.
+        if let Poll::Ready(content) = future.as_mut().poll(context) {
+            return content;
         }
+        thread::park();
     }
-
-    None
 }
