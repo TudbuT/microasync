@@ -1,4 +1,5 @@
 use std::{future::Future, task::{Context, Waker, RawWaker, RawWakerVTable, Poll}, thread, ptr::null};
+use core::pin::Pin;
 
 fn empty(_: *const ()) {}
 fn empty_clone(_: *const ()) -> RawWaker {
@@ -14,9 +15,12 @@ fn empty_waker() -> Waker {
     unsafe { Waker::from_raw(empty_raw_waker()) }
 }
 
-pub fn sync<T>(future: impl Future<Output = T> + 'static) -> T {
+pub fn sync<T>(mut future: impl Future<Output = T> + 'static) -> T {
     // Initialize things
-    let mut future = Box::pin(future);
+    // SAFETY: Safe because of use-case
+    let mut future = unsafe {
+        Pin::new_unchecked(&mut future)
+    };
 
     // Now actually run the future.
     loop {
