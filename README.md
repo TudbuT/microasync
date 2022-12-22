@@ -22,7 +22,7 @@ use microasync::sync;
 fn main() {
     //println!("{}", do_sth_async(1000).await);
 
-    println!("{}", sync(do_sth_async(1000)).unwrap());
+    println!("{}", sync(do_sth_async(1000)));
 }
 
 async fn add_async(a: i32, b: i32) -> i32 {
