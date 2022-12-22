@@ -1,6 +1,16 @@
 #![no_std]
-use core::{future::Future, task::{Context, Waker, RawWaker, RawWakerVTable, Poll}, ptr::null};
+
+#[cfg(not(feature = "no_joiner"))]
+mod joiner;
+#[cfg(not(feature = "no_joiner"))]
+pub use joiner::{join, prep};
+
 use core::pin::Pin;
+use core::{
+    future::Future,
+    ptr::null,
+    task::{Context, Poll, RawWaker, RawWakerVTable, Waker},
+};
 
 fn empty(_: *const ()) {}
 fn empty_clone(_: *const ()) -> RawWaker {
@@ -8,7 +18,10 @@ fn empty_clone(_: *const ()) -> RawWaker {
 }
 
 fn empty_raw_waker() -> RawWaker {
-    RawWaker::new(null(), &RawWakerVTable::new(empty_clone, empty, empty, empty))
+    RawWaker::new(
+        null(),
+        &RawWakerVTable::new(empty_clone, empty, empty, empty),
+    )
 }
 
 fn empty_waker() -> Waker {
@@ -19,9 +32,7 @@ fn empty_waker() -> Waker {
 pub fn sync<T>(mut future: impl Future<Output = T> + 'static) -> T {
     // Initialize things
     // SAFETY: Safe because this is single threaded and `future` won't be dropped.
-    let mut future = unsafe {
-        Pin::new_unchecked(&mut future)
-    };
+    let mut future = unsafe { Pin::new_unchecked(&mut future) };
 
     // Now actually run the future.
     loop {
@@ -33,7 +44,8 @@ pub fn sync<T>(mut future: impl Future<Output = T> + 'static) -> T {
         if let Poll::Ready(content) = future.as_mut().poll(context) {
             return content;
         }
-        #[cfg(not(feature = "no_std"))] {
+        #[cfg(not(feature = "no_std"))]
+        {
             // this won't be added to the binary if the no_std feature is enabled.
             extern crate std;
             // thread::yield_now is bug-ridden, this'll have to do.

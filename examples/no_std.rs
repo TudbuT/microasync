@@ -1,4 +1,4 @@
-// we don't actually use #![no_std] to be able to compile this. 
+// we don't actually use #![no_std] to be able to compile this.
 // make sure to add --features no_std.
 
 use microasync::sync;

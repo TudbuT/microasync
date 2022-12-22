@@ -38,3 +38,13 @@ async fn do_sth_async(i: i32) -> i32 {
 
 This crate supports a `no_std` environment. To do this, enable the `no_std` feature of
 this crate.
+
+## Joining
+
+Multiple futures can be joined using the join!() macro, which will effectively parallelize two
+futures into one, which can then, once again, be run by sync(). This allows most things
+to be implementable using MicroAsync.
+
+This feature can be deactivated by using the `no_joiner` feature flag.
+
+A demo of this feature can be found in `examples/join.rs`.

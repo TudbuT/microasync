@@ -1,6 +1,6 @@
 [package]
 name = "microasync"
-version = "0.2.7"
+version = "0.3.0"
 edition = "2021"
 repository = "https://github.com/tudbut/microasync"
 license = "MIT"
@@ -11,3 +11,4 @@ categories = ["no-std", "embedded"]
 
 [features]
 no_std = []
+no_joiner = []
