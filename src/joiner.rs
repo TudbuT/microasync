@@ -8,22 +8,22 @@ extern crate alloc;
 use alloc::boxed::Box;
 use alloc::vec::Vec;
 
-pub type BoxFuture<T> = Pin<Box<dyn Future<Output = T> + 'static>>;
+pub type BoxFuture<'a, T> = Pin<Box<dyn Future<Output = T> + 'a>>;
 
-pub struct JoinedFuture<T> {
-    futures: Vec<(Option<T>, BoxFuture<T>)>,
+pub struct JoinedFuture<'a, T> {
+    futures: Vec<(Option<T>, BoxFuture<'a, T>)>,
 }
 
-impl<T> JoinedFuture<T> {
+impl<'a, T> JoinedFuture<'a, T> {
     #[inline]
-    fn new(futures: Vec<BoxFuture<T>>) -> Self {
+    fn new(futures: Vec<BoxFuture<'a, T>>) -> Self {
         Self {
             futures: futures.into_iter().map(|x| (None, x)).collect(),
         }
     }
 }
 
-impl<T> Future for JoinedFuture<T> {
+impl<'a, T> Future for JoinedFuture<'a, T> {
     type Output = Vec<T>;
 
     fn poll(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
@@ -51,7 +51,7 @@ impl<T> Future for JoinedFuture<T> {
 }
 
 #[inline]
-pub fn prep<T>(future: impl Future<Output = T> + 'static) -> BoxFuture<T> {
+pub fn prep<'a, T>(future: impl Future<Output = T> + 'a) -> BoxFuture<'a, T> {
     Box::pin(future)
 }
 

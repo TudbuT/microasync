@@ -31,7 +31,7 @@ fn empty_waker() -> Waker {
     unsafe { Waker::from_raw(empty_raw_waker()) }
 }
 
-pub fn sync<T>(mut future: impl Future<Output = T> + 'static) -> T {
+pub fn sync<T>(mut future: impl Future<Output = T>) -> T {
     // Initialize things
     // SAFETY: Safe because this is single threaded and `future` won't be dropped.
     let mut future = unsafe { Pin::new_unchecked(&mut future) };
