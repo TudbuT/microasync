@@ -8,7 +8,7 @@ extern crate alloc;
 use alloc::boxed::Box;
 use alloc::vec::Vec;
 
-type BoxFuture<T> = Pin<Box<dyn Future<Output = T> + 'static>>;
+pub type BoxFuture<T> = Pin<Box<dyn Future<Output = T> + 'static>>;
 
 pub struct JoinedFuture<T> {
     futures: Vec<(Option<T>, BoxFuture<T>)>,
@@ -65,6 +65,15 @@ macro_rules! join {
     ($($a:expr),* $(,)?) => {
         join(vec![$(
             prep($a),
+        )*])
+    };
+}
+
+#[macro_export]
+macro_rules! join_boxed {
+    ($($a:expr),* $(,)?) => {
+        join(vec![$(
+            $a,
         )*])
     };
 }

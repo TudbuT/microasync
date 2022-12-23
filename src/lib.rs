@@ -3,7 +3,7 @@
 #[cfg(not(feature = "no_joiner"))]
 mod joiner;
 #[cfg(not(feature = "no_joiner"))]
-pub use joiner::{join, prep};
+pub use joiner::{join, prep, BoxFuture};
 
 use core::pin::Pin;
 use core::{
