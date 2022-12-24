@@ -64,7 +64,7 @@ pub fn join<T>(futures: Vec<BoxFuture<T>>) -> JoinedFuture<T> {
 macro_rules! join {
     ($($a:expr),* $(,)?) => {
         join(vec![$(
-            prep($a),
+            $crate::prep($a),
         )*])
     };
 }
