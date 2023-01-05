@@ -31,7 +31,7 @@ fn empty_waker() -> Waker {
     unsafe { Waker::from_raw(empty_raw_waker()) }
 }
 
-pub fn sync<T>(mut future: impl Future<Output = T>) -> T {
+pub fn sync_with<T>(mut future: impl Future<Output = T>, poll_delay: u64) -> T {
     // Initialize things
     // SAFETY: Safe because this is single threaded and `future` won't be dropped.
     let mut future = unsafe { Pin::new_unchecked(&mut future) };
@@ -51,7 +51,11 @@ pub fn sync<T>(mut future: impl Future<Output = T>) -> T {
             // this won't be added to the binary if the no_std feature is enabled.
             extern crate std;
             // thread::yield_now is bug-ridden, this'll have to do.
-            std::thread::sleep(std::time::Duration::from_millis(1));
+            std::thread::sleep(std::time::Duration::from_millis(poll_delay));
         }
     }
+}
+
+pub fn sync<T>(future: impl Future<Output = T>) -> T {
+    sync_with(future, 1)
 }
